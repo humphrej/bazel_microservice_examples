@@ -4,7 +4,7 @@ java_test(
     srcs = glob(["*.java"]),
     test_class= "hello.GreetingResourceTest",
     deps = [
-        "//src/main/java/hello:hello_server_lib",
+        "//src/main/java/hello:hello_dropwizard_server_lib",
         "//third_party/maven/io/dropwizard:dropwizard_testing",
         "//third_party/maven/junit:junit",
         "//third_party/maven/org/hamcrest:hamcrest_core",

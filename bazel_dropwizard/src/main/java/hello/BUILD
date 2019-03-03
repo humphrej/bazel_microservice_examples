@@ -1,7 +1,7 @@
 load("@io_bazel_rules_docker//container:container.bzl", "container_image")
 
 java_library(
-    name = "hello_server_lib",
+    name = "hello_dropwizard_server_lib",
     srcs = glob(["*.java"]),
 
     deps = [
@@ -16,21 +16,15 @@ java_library(
     visibility = ["//src/test/java/hello:__pkg__"],
 )
 
-java_binary(
-    name = "hello_server",
+load("@io_bazel_rules_docker//java:image.bzl", "java_image")
+
+java_image(
+    name = "hello_dropwizard_server",
     main_class = "hello.HelloApplication",
+    base = "@java_base//image",
 
     runtime_deps = [
-        "hello_server_lib",
+        "hello_dropwizard_server_lib",
     ],
     visibility = ["//src/test/java/hello:__pkg__"],
 )
-
-container_image(
-    name = "hello_server_image",
-    base = "@java_base//image",
-    files = [":hello_server_deploy.jar"],
-    cmd = ["hello_server_deploy.jar"],
-    ports = ["8001"]
-)
-
