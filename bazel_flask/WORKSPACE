@@ -1,0 +1,59 @@
+workspace(name = "bazel_flask")
+
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
+
+# Let's import the python_image rule
+http_archive(
+    name = "io_bazel_rules_docker",
+    sha256 = "ed9b4cd5d1c37e5b9243e4eaf31a8e155fd49f2a73955dc07512b5b476e63ea6",
+    strip_prefix = "rules_docker-10ac85c3a91a38c6a0c178844c75b27092330ee9",
+    urls = ["https://github.com/bazelbuild/rules_docker/archive/10ac85c3a91a38c6a0c178844c75b27092330ee9.tar.gz"],
+)
+
+load(
+    "@io_bazel_rules_docker//repositories:repositories.bzl",
+    container_repositories = "repositories",
+)
+
+container_repositories()
+
+
+# We use py_image to build a sample service
+load(
+   "@io_bazel_rules_docker//python:image.bzl",
+    _py_image_repos = "repositories",
+)
+
+_py_image_repos()
+
+
+# rules_python setup
+git_repository(
+    name = "io_bazel_rules_python",
+    remote = "https://github.com/bazelbuild/rules_python.git",
+    commit = "c08d1e6325d8bb5f6227dd284d1859182a5936c1",  # 2018-12-17
+)
+
+
+# Only needed for PIP support:
+load("@io_bazel_rules_python//python:pip.bzl", "pip_repositories")
+
+pip_repositories()
+
+# Parse the requirements.txt
+load("@io_bazel_rules_python//python:pip.bzl", "pip_import")
+
+# This rule translates the specified requirements.txt into
+# @my_deps//:requirements.bzl, which itself exposes a pip_install method.
+pip_import(
+   name = "my_deps",
+   requirements = "//:requirements.txt",
+)
+
+# Load the pip_install symbol for my_deps, and create the dependencies'
+# repositories.
+load("@my_deps//:requirements.bzl", "pip_install")
+pip_install()
+
+
